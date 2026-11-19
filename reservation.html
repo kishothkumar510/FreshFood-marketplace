@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Foods | Table Reservation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- jsPDF library for PDF receipt generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #fffaf0; color: #333; line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; }
+        .navbar { background: #2d5a27; padding: 15px 10%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-container { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .ff-logo-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ffcc00; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .logo-text { color: white; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; }
+        .nav-links { list-style: none; display: flex; align-items: center; gap: 5px; }
+        .nav-links li a { text-decoration: none; color: white; font-weight: 600; padding: 8px 15px; border-radius: 4px; transition: 0.3s; }
+        .nav-links li a:hover, .nav-links li a.active { background: rgba(255,255,255,0.15); color: #ffcc00; }
+        .cart-badge { background: #ff4444; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; margin-left: 5px; }
+        .burger { display: none; cursor: pointer; color: white; font-size: 1.8rem; }
+
+        .main-content { flex: 1; padding: 60px 10%; max-width: 1200px; margin: 0 auto; width: 100%; }
+        h2 { color: #2d5a27; font-size: 2.5rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 40px; font-size: 1.1rem; }
+        
+        .reservation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+        .reservation-form-card { background: white; padding: 35px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: left; border-top: 6px solid #2d5a27; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #2d5a27; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        textarea { resize: vertical; }
+        .btn { background: #2d5a27; color: white; padding: 14px 25px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; text-transform: uppercase; transition: 0.3s; font-size: 1rem; }
+        .btn:hover { background: #1e3d1a; }
+        
+        .reservation-info { background: white; padding: 35px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 6px solid #ffcc00; }
+        .reservation-info h3 { color: #2d5a27; font-size: 1.5rem; margin-bottom: 20px; }
+        .reservation-info ul { list-style: none; }
+        .reservation-info li { margin-bottom: 15px; display: flex; align-items: flex-start; gap: 12px; font-size: 1.05rem; color: #444; }
+        .reservation-info li i { color: #2d5a27; font-size: 1.3rem; margin-top: 3px; }
+
+        footer { background: #2d5a27; color: white; padding: 40px 10%; text-align: center; margin-top: 60px; }
+        .footer-links { margin-bottom: 20px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .footer-links a { color: white; text-decoration: none; font-weight: 500; }
+        .footer-links a:hover { color: #ffcc00; }
+        .social-icons { margin-bottom: 20px; }
+        .social-icons a { color: white; font-size: 1.5rem; margin: 0 10px; transition: 0.3s; }
+        .social-icons a:hover { color: #ffcc00; }
+
+        @media screen and (max-width: 768px) {
+            .nav-links { display: none; flex-direction: column; width: 100%; background: #2d5a27; position: absolute; top: 75px; left: 0; padding: 20px 0; }
+            .nav-links.active { display: flex; }
+            .burger { display: block; }
+            .reservation-grid { grid-template-columns: 1fr; }
+        }
+        @media screen and (min-width: 1024px) {
+            .nav-links { display: flex !important; }
+            .burger { display: none; }
+        }
+    </style>
+    <link rel="stylesheet" href="/src/responsive.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">
+            <img src="FF logo (1).jpg" alt="FF Logo" class="ff-logo-img">
+            <span class="logo-text">FRESH FOODS</span>
+        </a>
+        <div class="burger" onclick="toggleMenu()">☰</div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="product.html">Products</a></li>
+            <li><a href="reservation.html" class="active">Reservations</a></li>
+            <li><a href="index.html#about">About Us</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+            <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart <span id="cart-count" class="cart-badge">0</span></a></li>
+            <li><a href="index.html#auth">Login/Signup</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <h2>Table Reservation</h2>
+        <p class="subtitle">Book your dining experience 24/7 with instant professional PDF receipt download.</p>
+        
+        <div class="reservation-grid">
+            <div class="reservation-info">
+                <h3><i class="fas fa-info-circle" style="color:#2d5a27;"></i> Reservation Benefits</h3>
+                <ul>
+                    <li><i class="fas fa-clock"></i> <strong>24/7 Availability:</strong> Book your table at any time of day or night for immediate confirmation.</li>
+                    <li><i class="fas fa-comment-alt"></i> <strong>Purpose Customization:</strong> Specify your special occasion (Birthday, Anniversary, Business Dinner, Family Gathering) in the message box.</li>
+                    <li><i class="fas fa-file-pdf"></i> <strong>Instant PDF Receipt:</strong> Receive a professionally formatted PDF download containing your unique booking reference upon submission.</li>
+                    <li><i class="fas fa-seedling"></i> <strong>Organic Cuisine:</strong> Enjoy premium seating reserved with priority access to our farm-fresh South Indian menu.</li>
+                </ul>
+                <div style="margin-top: 30px;">
+                    <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80" alt="Restaurant Ambience" style="width:100%; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
+                </div>
+            </div>
+
+            <div class="reservation-form-card">
+                <h3 style="color:#2d5a27; margin-bottom:20px;"><i class="fas fa-calendar-alt"></i> Table Booking Form</h3>
+                <form id="reservationForm" onsubmit="handleReservationPDF(event)">
+                    <div class="form-group">
+                        <label for="resName">Full Name</label>
+                        <input type="text" id="resName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resEmail">Email Address</label>
+                        <input type="email" id="resEmail" placeholder="Enter your email address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resPhone">Phone Number</label>
+                        <input type="tel" id="resPhone" placeholder="Enter your phone number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resDate">Reservation Date</label>
+                        <input type="date" id="resDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="resTime">Time Slot (24/7 Available)</label>
+                        <select id="resTime" required>
+                            <option value="">Select Time Slot</option>
+                            <option value="06:00 AM - 08:00 AM (Early Breakfast)">06:00 AM - 08:00 AM (Early Breakfast)</option>
+                            <option value="08:00 AM - 10:00 AM (Breakfast)">08:00 AM - 10:00 AM (Breakfast)</option>
+                            <option value="10:00 AM - 12:00 PM (Morning Brunch)">10:00 AM - 12:00 PM (Morning Brunch)</option>
+                            <option value="12:00 PM - 02:00 PM (Lunch)">12:00 PM - 02:00 PM (Lunch)</option>
+                            <option value="02:00 PM - 04:00 PM (Late Lunch)">02:00 PM - 04:00 PM (Late Lunch)</option>
+                            <option value="04:00 PM - 06:00 PM (Evening Snacks & Coffee)">04:00 PM - 06:00 PM (Evening Snacks & Coffee)</option>
+                            <option value="06:00 PM - 08:00 PM (Dinner)">06:00 PM - 08:00 PM (Dinner)</option>
+                            <option value="08:00 PM - 10:00 PM (Late Dinner)">08:00 PM - 10:00 PM (Late Dinner)</option>
+                            <option value="10:00 PM - 06:00 AM (Late Night / 24x7 Special)">10:00 PM - 06:00 AM (Late Night / 24x7 Special)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="resGuests">Number of Guests</label>
+                        <select id="resGuests" required>
+                            <option value="1">1 Person</option>
+                            <option value="2" selected>2 Guests</option>
+                            <option value="4">4 Guests</option>
+                            <option value="6">6 Guests</option>
+                            <option value="8+">8+ Guests (Large Party)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="resMessage">Purpose of Reservation / Special Requests</label>
+                        <textarea id="resMessage" rows="3" placeholder="e.g. Birthday Celebration, Business Meeting, Anniversary, Dietary preferences..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn"><i class="fas fa-file-pdf"></i> Confirm & Download PDF Receipt</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="product.html">Products</a>
+            <a href="reservation.html">Reservations</a>
+            <a href="index.html#about">About Us</a>
+            <a href="index.html#contact">Contact</a>
+        </div>
+        <div class="social-icons">
+            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
+        <p>&copy; 2026 Fresh Foods (FF). All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+        function updateCartBadge() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const badge = document.getElementById('cart-count');
+            if(badge) badge.innerText = cart.length;
+        }
+
+        // PDF Receipt Generation using jsPDF
+        function handleReservationPDF(event) {
+            event.preventDefault();
+            const name = document.getElementById('resName').value.trim();
+            const email = document.getElementById('resEmail').value.trim();
+            const phone = document.getElementById('resPhone').value.trim();
+            const date = document.getElementById('resDate').value;
+            const time = document.getElementById('resTime').value;
+            const guests = document.getElementById('resGuests').value;
+            const message = document.getElementById('resMessage').value.trim();
+
+            const bookingRef = 'FF-RES-' + Math.floor(100000 + Math.random() * 900000);
+
+            // Initialize jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Header Background
+            doc.setFillColor(45, 90, 39); // Deep green #2d5a27
+            doc.rect(0, 0, 210, 40, 'F');
+
+            // Header Text
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(22);
+            doc.text("FRESH FOODS (FF)", 20, 20);
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            doc.text("Official Table Reservation Receipt", 20, 30);
+
+            // Booking Reference Box
+            doc.setFillColor(245, 245, 245);
+            doc.roundedRect(20, 50, 170, 25, 3, 3, 'F');
+            doc.setTextColor(45, 90, 39);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("Booking Reference:", 25, 62);
+            doc.setTextColor(51, 51, 51);
+            doc.text(bookingRef, 70, 62);
+            doc.setFontSize(10);
+            doc.text("Date Issued: " + new Date().toLocaleDateString(), 135, 62);
+
+            // Details Section
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.setTextColor(45, 90, 39);
+            doc.text("Reservation Details", 20, 90);
+
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, 95, 190, 95);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            doc.setTextColor(51, 51, 51);
+
+            let startY = 105;
+            const lineHeight = 10;
+
+            const details = [
+                ["Guest Name:", name],
+                ["Email Address:", email],
+                ["Phone Number:", phone],
+                ["Reservation Date:", date],
+                ["Time Slot (24/7):", time],
+                ["Number of Guests:", guests + " Person(s)"],
+                ["Purpose / Request:", message]
+            ];
+
+            details.forEach(([label, val]) => {
+                doc.setFont("helvetica", "bold");
+                doc.text(label, 20, startY);
+                doc.setFont("helvetica", "normal");
+                doc.text(val, 65, startY);
+                startY += lineHeight;
+            });
+
+            // Status Badge
+            doc.setFillColor(230, 245, 230);
+            doc.roundedRect(20, startY + 10, 170, 20, 3, 3, 'F');
+            doc.setTextColor(45, 90, 39);
+            doc.setFont("helvetica", "bold");
+            doc.text("STATUS: CONFIRMED & TABLE RESERVED", 30, startY + 22);
+
+            // Footer Note
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text("Thank you for choosing Fresh Foods! Please present this PDF receipt upon arrival.", 20, startY + 45);
+            doc.text("123 Heritage Lane, Chennai | Support: support@freshfoods.com", 20, startY + 52);
+
+            // Save PDF
+            doc.save(`FreshFoods_Reservation_${bookingRef}.pdf`);
+
+            alert("Table reserved successfully! Your PDF receipt has been downloaded.");
+            document.getElementById('reservationForm').reset();
+        }
+
+        updateCartBadge();
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Foods | Order Success</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #fffaf0; display: flex; flex-direction: column; min-height: 100vh; color: #333; }
+        .navbar { background: #2d5a27; padding: 15px 10%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-container { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .ff-logo-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #ffcc00; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .logo-text { color: white; font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; }
+        .nav-links { list-style: none; display: flex; align-items: center; gap: 5px; }
+        .nav-links li a { text-decoration: none; color: white; font-weight: 600; padding: 8px 15px; border-radius: 4px; transition: 0.3s; }
+        .nav-links li a:hover { background: rgba(255,255,255,0.15); color: #ffcc00; }
+        .burger { display: none; cursor: pointer; color: white; font-size: 1.8rem; }
+
+        .content-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .success-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); max-width: 500px; width: 100%; border-top: 8px solid #2d5a27; text-align: center; }
+        .success-card i { font-size: 4rem; color: #2d5a27; margin-bottom: 20px; }
+        h1 { font-size: 2.2rem; margin-bottom: 15px; color: #2d5a27; }
+        p { font-size: 1.1rem; color: #555; margin-bottom: 25px; }
+        .home-btn { background: #2d5a27; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; transition: 0.3s; }
+        .home-btn:hover { background: #1e3d1a; }
+
+        footer { background: #2d5a27; color: white; padding: 30px 10%; text-align: center; }
+        @media screen and (max-width: 768px) {
+            .nav-links { display: none; flex-direction: column; width: 100%; background: #2d5a27; position: absolute; top: 75px; left: 0; padding: 20px 0; }
+            .nav-links.active { display: flex; }
+            .burger { display: block; }
+        }
+        @media screen and (min-width: 1024px) {
+            .nav-links { display: flex !important; }
+            .burger { display: none; }
+        }
+    </style>
+    <link rel="stylesheet" href="/src/responsive.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo-container">
+            <img src="FF logo (1).jpg" alt="FF Logo" class="ff-logo-img">
+            <span class="logo-text">FRESH FOODS</span>
+        </a>
+        <div class="burger" onclick="toggleMenu()">☰</div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="product.html">Products</a></li>
+            <li><a href="reservation.html">Reservations</a></li>
+            <li><a href="cart.html">Cart</a></li>
+        </ul>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="success-card">
+            <i class="fas fa-check-circle"></i>
+            <h1>Order Placed Successfully!</h1>
+            <p>Your delicious farm-fresh South Indian meal is being prepared and is on its way to you.</p>
+            <a href="index.html" class="home-btn" onclick="localStorage.removeItem('cart')">Return to Home</a>
+        </div>
+    </div>
+
+    <footer>
+        <p style="font-size: 0.9rem; opacity: 0.8;">&copy; 2026 Fresh Foods (FF). All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+        localStorage.removeItem('cart');
+    </script>
+</body>
+</html>
